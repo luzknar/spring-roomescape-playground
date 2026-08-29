@@ -6,8 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.service.ReservationService;
+import roomescape.model.Reservation;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -22,12 +24,19 @@ public class ReservationController {
 
     @GetMapping("/reservations")
     public ResponseEntity<List<ReservationResponseDto>> read() {
-        return ResponseEntity.ok().body(reservationService.read());
+        List<ReservationResponseDto> responseDtos = new ArrayList<>();
+        List<Reservation> reservations = reservationService.read();
+        for (Reservation reservation : reservations) {
+            responseDtos.add(new ReservationResponseDto(reservation));
+        }
+        return ResponseEntity.ok().body(responseDtos);
     }
 
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponseDto> create(@RequestBody ReservationRequestDto reservationDTO) {
-        ReservationResponseDto responseDto = reservationService.create(reservationDTO);
+        Reservation reservation = reservationDTO.toEntity();
+        Reservation savedReservation = reservationService.create(reservation);
+        ReservationResponseDto responseDto = new ReservationResponseDto(savedReservation);
         return ResponseEntity.created(URI.create("/reservations/" + responseDto.getId())).body(responseDto);
     }
 
