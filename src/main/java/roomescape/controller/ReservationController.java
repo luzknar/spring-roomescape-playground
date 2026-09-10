@@ -1,5 +1,6 @@
 package roomescape.controller;
 
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import roomescape.controller.dto.ReservationRequestDto;
 import roomescape.controller.dto.ReservationResponseDto;
 import org.springframework.http.HttpStatus;
@@ -38,11 +39,6 @@ public class ReservationController {
         return ResponseEntity.noContent().build();
     }
 
-    @ExceptionHandler(value = IllegalArgumentException.class)
-    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
-    }
-
     @ExceptionHandler(value = RuntimeException.class)
     public ResponseEntity<String> handleRuntimeException(RuntimeException e) {
         return ResponseEntity.internalServerError().body(e.getMessage());
@@ -52,5 +48,11 @@ public class ReservationController {
     public ResponseEntity<String> handleNotFoundException(NotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
+
+    @ExceptionHandler(value = {IllegalArgumentException.class, HttpMessageNotReadableException.class})
+    public ResponseEntity<String> handleBadRequest(Exception e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
+
 }
 
