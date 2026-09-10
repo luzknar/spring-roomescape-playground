@@ -6,7 +6,7 @@ public class Time {
     private final Long id;
     private final LocalTime time;
 
-    private Time(Long id, LocalTime time) {
+    public Time(Long id, LocalTime time) {
         validateTimeArgument(time);
         this.id = id;
         this.time = time;

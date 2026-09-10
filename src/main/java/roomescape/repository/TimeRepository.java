@@ -48,5 +48,14 @@ public class TimeRepository {
         return times;
     }
 
+    public Time findById(Long id) {
+        String sql = "SELECT id, time FROM time WHERE id = ?";
+        List<Time> times = jdbcTemplate.query(sql, timeRowMapper, id);
+        if (times.isEmpty()) {
+            return null;
+        }
+        return times.get(0);
+    }
+
 
 }
