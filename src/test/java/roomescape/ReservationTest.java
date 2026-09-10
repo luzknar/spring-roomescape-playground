@@ -2,9 +2,12 @@ package roomescape;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.LocalDate;
@@ -17,6 +20,16 @@ import static org.hamcrest.Matchers.is;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ReservationTest {
     private LocalDate testDate = LocalDate.now().plusDays(1);
+    private Long timeId;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @BeforeEach
+    void set() {
+        jdbcTemplate.update("INSERT INTO time (time) VALUES (?)", "15:40");
+        timeId = jdbcTemplate.queryForObject("SELECT id FROM time WHERE time = '15:40'", Long.class);
+    }
 
 
     @Test
@@ -85,11 +98,29 @@ public class ReservationTest {
                 .when().post("/reservations");
     }
 
-    private Map<String, String> createParams() {
-        Map<String, String> params = new HashMap<>();
+    @Test
+    @DisplayName("timeId 대신 time 문자열로 요청 시 400 에러가 발생한다")
+    void createReservation_WithLegacyTimeFormat_ThrowsException() {
+        Map<String, String> reservation = new HashMap<>();
+        reservation.put("name", "브라운");
+        reservation.put("date", "2023-08-05");
+        reservation.put("time", "10:00");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(reservation)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(400);
+    }
+
+
+
+    private Map<String, Object> createParams() {
+        Map<String, Object> params = new HashMap<>();
         params.put("name", "브라운");
         params.put("date", testDate.toString());
-        params.put("time", "15:40");
+        params.put("timeId", timeId);
 
         return params;
     }

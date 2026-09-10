@@ -28,7 +28,10 @@ public class ReservationDatabaseTest {
     @Test
     @DisplayName("DB에 예약 데이터가 존재할 때 예약 목록 조회 API 호출 시 정상 반환된다")
     void testReadReservationsFromDatabase() {
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time) VALUES (?, ?, ?)", "브라운", "2026-10-05", "15:40");
+        jdbcTemplate.update("INSERT INTO time (time) VALUES (?)", "15:40");
+        Long timeId = jdbcTemplate.queryForObject("SELECT id FROM time WHERE time = '15:40'", Long.class);
+
+        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id) VALUES (?, ?, ?)", "브라운", "2026-10-05", timeId);
         Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
 
         RestAssured.given().log().all()
@@ -41,10 +44,13 @@ public class ReservationDatabaseTest {
     @Test
     @DisplayName("예약 추가, 취소 API가 정상 작동하여 DB에 반영된다")
     void testUpdateReservationsFromDatabase() {
-        Map<String, String> params = new HashMap<>();
+        jdbcTemplate.update("INSERT INTO time (time) VALUES (?)", "10:00");
+        Long timeId = jdbcTemplate.queryForObject("SELECT id FROM time WHERE time = '10:00'", Long.class);
+
+        Map<String, Object> params = new HashMap<>();
         params.put("name", "브라운");
         params.put("date", testDate.toString());
-        params.put("time", "10:00");
+        params.put("timeId", timeId);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
