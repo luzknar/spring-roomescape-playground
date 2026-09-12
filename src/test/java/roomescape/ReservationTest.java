@@ -7,6 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 
@@ -16,11 +17,15 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ReservationTest {
     private LocalDate testDate = LocalDate.now().plusDays(1);
     private Long timeId;
+
+    @LocalServerPort
+    int port;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -29,6 +34,7 @@ public class ReservationTest {
     void set() {
         jdbcTemplate.update("INSERT INTO time (time) VALUES (?)", "15:40");
         timeId = jdbcTemplate.queryForObject("SELECT id FROM time WHERE time = '15:40'", Long.class);
+        RestAssured.port = this.port;
     }
 
 
@@ -120,7 +126,7 @@ public class ReservationTest {
         Map<String, Object> params = new HashMap<>();
         params.put("name", "브라운");
         params.put("date", testDate.toString());
-        params.put("timeId", timeId);
+        params.put("time", timeId);
 
         return params;
     }

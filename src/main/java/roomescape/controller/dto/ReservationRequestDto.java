@@ -1,6 +1,5 @@
 package roomescape.controller.dto;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 
 import java.time.LocalDate;
 
