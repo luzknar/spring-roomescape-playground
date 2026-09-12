@@ -24,7 +24,7 @@ public class ReservationService {
     }
 
     public ReservationResponseDto create(ReservationRequestDto reservationDTO) {
-        Time time = timeRepository.findById(reservationDTO.timeId());
+        Time time = timeRepository.findById(reservationDTO.time());
         if (time == null) {
             throw new NotFoundException("선택한 시간을 찾을 수 없습니다.");
         }
